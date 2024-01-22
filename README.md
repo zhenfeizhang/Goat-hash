@@ -17,7 +17,7 @@ ${R}_{t}:= \mathbb{Z}_{t}[X]/(x^{n} + 1)$ and ${R}_{q}:= \mathbb{Z}_{q}[X]/(x^{n
 
 The hash function is defined as
 
-- Setup: $\forall i \in [0,4), a_i \gets_\$ \mathcal{R}_q$ 
+- Setup: $\forall i \in [0,4), a_i \gets_R \mathcal{R}_q$ 
 - Hashing messages $m_1, m_2, m_3, m_4\in\mathcal{R}_{16}$
 $$\mathcal{H}({\bf m}) = a_1 m_1 + a_2 m_2 + a_3m_3 + a_4m_4 \in \mathcal{R}_q$$
 
