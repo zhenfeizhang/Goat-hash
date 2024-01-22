@@ -3,6 +3,7 @@ use std::{
     ops::{Add, Mul},
 };
 
+use ark_std::rand::RngCore;
 use goldilocks::{Goldilocks, SmallField};
 
 use crate::param::{INV_NTT_TABLE, N, NTT_TABLE, ONE_OVER_N};
@@ -16,7 +17,7 @@ impl Mul for &RingElement<Goldilocks> {
     type Output = RingElement<Goldilocks>;
 
     fn mul(self, rhs: &RingElement<Goldilocks>) -> Self::Output {
-        (&(&RingELementNTTRepr::from(self) * &RingELementNTTRepr::from(rhs))).into()
+        (&(&RingElementNTTRepr::from(self) * &RingElementNTTRepr::from(rhs))).into()
     }
 }
 
@@ -28,12 +29,28 @@ impl Mul for RingElement<Goldilocks> {
     }
 }
 
+impl<F: SmallField> RingElement<F> {
+    pub fn random(mut rng: impl RngCore) -> Self {
+        Self {
+            elements: (0..N).map(|_| F::random(&mut rng)).collect(),
+        }
+    }
+
+    pub fn random_message(mut rng: impl RngCore) -> Self {
+        Self {
+            elements: (0..N)
+                .map(|_| F::from((rng.next_u32() % 16) as u64))
+                .collect(),
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct RingELementNTTRepr<F: SmallField> {
+pub(crate) struct RingElementNTTRepr<F: SmallField> {
     pub(crate) elements: Vec<F>,
 }
 
-impl<F: SmallField> Default for RingELementNTTRepr<F> {
+impl<F: SmallField> Default for RingElementNTTRepr<F> {
     fn default() -> Self {
         Self {
             elements: vec![F::default(); N],
@@ -41,11 +58,11 @@ impl<F: SmallField> Default for RingELementNTTRepr<F> {
     }
 }
 
-impl<F: SmallField> Add for &RingELementNTTRepr<F> {
-    type Output = RingELementNTTRepr<F>;
+impl<F: SmallField> Add for &RingElementNTTRepr<F> {
+    type Output = RingElementNTTRepr<F>;
 
     // Pairwise addition
-    fn add(self, rhs: &RingELementNTTRepr<F>) -> Self::Output {
+    fn add(self, rhs: &RingElementNTTRepr<F>) -> Self::Output {
         let mut res = self.clone();
         res.elements
             .iter_mut()
@@ -55,25 +72,25 @@ impl<F: SmallField> Add for &RingELementNTTRepr<F> {
     }
 }
 
-impl<F: SmallField> Add for RingELementNTTRepr<F> {
-    type Output = RingELementNTTRepr<F>;
+impl<F: SmallField> Add for RingElementNTTRepr<F> {
+    type Output = RingElementNTTRepr<F>;
 
-    fn add(self, rhs: RingELementNTTRepr<F>) -> Self::Output {
+    fn add(self, rhs: RingElementNTTRepr<F>) -> Self::Output {
         &self + &rhs
     }
 }
 
-impl<F: SmallField> Sum for RingELementNTTRepr<F> {
+impl<F: SmallField> Sum for RingElementNTTRepr<F> {
     fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
         iter.fold(Self::default(), |acc, item| acc + item)
     }
 }
 
-impl<F: SmallField> Mul for &RingELementNTTRepr<F> {
-    type Output = RingELementNTTRepr<F>;
+impl<F: SmallField> Mul for &RingElementNTTRepr<F> {
+    type Output = RingElementNTTRepr<F>;
 
     // Pairwise multiplication
-    fn mul(self, rhs: &RingELementNTTRepr<F>) -> Self::Output {
+    fn mul(self, rhs: &RingElementNTTRepr<F>) -> Self::Output {
         let mut res = self.clone();
         res.elements
             .iter_mut()
@@ -83,15 +100,23 @@ impl<F: SmallField> Mul for &RingELementNTTRepr<F> {
     }
 }
 
-impl<F: SmallField> Mul for RingELementNTTRepr<F> {
-    type Output = RingELementNTTRepr<F>;
+impl<F: SmallField> Mul for RingElementNTTRepr<F> {
+    type Output = RingElementNTTRepr<F>;
 
-    fn mul(self, rhs: RingELementNTTRepr<F>) -> Self::Output {
+    fn mul(self, rhs: RingElementNTTRepr<F>) -> Self::Output {
         &self * &rhs
     }
 }
 
-impl From<&RingElement<Goldilocks>> for RingELementNTTRepr<Goldilocks> {
+impl<F: SmallField> RingElementNTTRepr<F> {
+    pub fn random(mut rng: impl RngCore) -> Self {
+        Self {
+            elements: (0..N).map(|_| F::random(&mut rng)).collect(),
+        }
+    }
+}
+
+impl From<&RingElement<Goldilocks>> for RingElementNTTRepr<Goldilocks> {
     // Forward NTT transform
     fn from(r: &RingElement<Goldilocks>) -> Self {
         let mut p = r.elements.clone();
@@ -121,9 +146,9 @@ impl From<&RingElement<Goldilocks>> for RingELementNTTRepr<Goldilocks> {
     }
 }
 
-impl From<&RingELementNTTRepr<Goldilocks>> for RingElement<Goldilocks> {
+impl From<&RingElementNTTRepr<Goldilocks>> for RingElement<Goldilocks> {
     // Reverse NTT transform
-    fn from(r: &RingELementNTTRepr<Goldilocks>) -> Self {
+    fn from(r: &RingElementNTTRepr<Goldilocks>) -> Self {
         let mut p = r.elements.clone();
         let mut t = 1;
         let mut m = N;
@@ -187,15 +212,9 @@ mod tests {
     #[test]
     fn test_ring_mul() {
         let mut rng = test_rng();
-        let a = RingElement {
-            elements: (0..N).map(|_| Goldilocks::random(&mut rng)).collect(),
-        };
-        let b = RingElement {
-            elements: (0..N).map(|_| Goldilocks::random(&mut rng)).collect(),
-        };
-        let c = RingElement {
-            elements: (0..N).map(|_| Goldilocks::random(&mut rng)).collect(),
-        };
+        let a = RingElement::random(&mut rng);
+        let b = RingElement::random(&mut rng);
+        let c = RingElement::random(&mut rng);
 
         let ab_then_c = &(&a * &b) * &c;
         let ac_then_b = &(&a * &c) * &b;

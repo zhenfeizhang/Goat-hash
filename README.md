@@ -1,5 +1,7 @@
-The Ajtai hash function Over Goldilocks 
+The Ajtai hash function Over Goldilocks (TAOG)
 ---
+__Caution__: A lot things here are still very preliminary...
+
 
 Hash function defined as
 
@@ -23,3 +25,5 @@ $$\mathcal{H}({\bf m}) = a_1 m_1 + a_2 m_2 + a_3m_3 + a_4m_4 \in \mathcal{R}_q$$
 
 
 Padding: we need to be careful about the input message. When the message does not fully fill ${R}_{16}^4$, extra cautions need to be taken about padding. We may parse the message as a vector of 4 bits elements, and pad with `t` to achieve a dimension of `256 * 4 = 1024`, and then parse the vector as 4 $\mathcal{R}_t$ elements.
+
+# Performance

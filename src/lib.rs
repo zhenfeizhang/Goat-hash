@@ -1,25 +1,25 @@
 use ark_std::rand::RngCore;
-use ff::Field;
-use goldilocks::Goldilocks;
-use param::{M, N};
-use ring::{RingELementNTTRepr, RingElement};
 
+use goldilocks::Goldilocks;
+use param::M;
+use ring::{RingElement, RingElementNTTRepr};
+
+#[cfg(test)]
+mod bench;
 mod param;
 mod ring;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct GoatHash {
-    param: [RingELementNTTRepr<Goldilocks>; M],
+    param: [RingElementNTTRepr<Goldilocks>; M],
 }
 
 impl GoatHash {
-    pub fn init<R>(mut rng: impl RngCore) -> Self {
+    pub fn init(mut rng: impl RngCore) -> Self {
         Self {
             param: (0..M)
-                .map(|_| RingELementNTTRepr {
-                    elements: (0..N).map(|_| Goldilocks::random(&mut rng)).collect(),
-                })
-                .collect::<Vec<RingELementNTTRepr<_>>>()
+                .map(|_| RingElementNTTRepr::random(&mut rng))
+                .collect::<Vec<_>>()
                 .try_into()
                 .unwrap(),
         }
@@ -30,8 +30,8 @@ impl GoatHash {
             .param
             .iter()
             .zip(inputs.iter())
-            .map(|(x, y)| x * &RingELementNTTRepr::from(y))
-            .sum::<RingELementNTTRepr<_>>())
+            .map(|(x, y)| x * &RingElementNTTRepr::from(y))
+            .sum::<RingElementNTTRepr<_>>())
             .into()
     }
 }
