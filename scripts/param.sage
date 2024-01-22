@@ -36,7 +36,7 @@ def get_params(n, m, q, c):
 ns = [128, 256, 512]
 
 # number of ring elements
-ms = [3, 4, 5]
+ms = [3, 4, 5, 6, 7, 8]
 
 # bkz parameter
 cs = [1.003, 1.004, 1.005]
