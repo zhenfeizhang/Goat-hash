@@ -29,7 +29,7 @@ def print_ntt():
     for i in range (1024):
         e = reverse_bits(ZZ(i), 10)
         t = ZZ(r^e)
-        print(t, end = ', ')
+        print("Goldilocks(", t, ")", end = ', ')
         # print(i, e, r^e)
     print()
 
@@ -43,7 +43,7 @@ def print_inv_ntt():
     for i in range (1024):
         e = reverse_bits(ZZ(i), 10)
         t = ZZ(r_inv^e)
-        print(t, end = ', ')
+        print("Goldilocks(", t, ")", end = ', ')
     print()
 
 print_ntt()
