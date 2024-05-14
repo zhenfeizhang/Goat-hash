@@ -15,7 +15,7 @@ with parameters
 
 
 where 
-$\mathcal{R}_{t}:= \mathbb{Z}_{t}[X]/(x^{n} + 1)$ and $\mathcal{R}_{q}:= \mathbb{Z}_{q}[X]/(x^{n} + 1)$ for $q = 2^{64} + 2^{32} + 1$ (i.e., Goldilocks field).
+$\mathcal{R}_{t}:= \mathbb{Z}_{t}[X]/(x^{n} + 1)$ and $\mathcal{R}_{q}:= \mathbb{Z}_{q}[X]/(x^{n} + 1)$ for $q = 2^{64} - 2^{32} + 1$ (i.e., Goldilocks field).
 
 The hash function is defined as
 
